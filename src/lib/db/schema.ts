@@ -29,4 +29,6 @@ export const ttsHistory = sqliteTable("tts_history", {
 export const settings = sqliteTable("settings", {
   key: text("key").primaryKey(),
   value: text("value").notNull(),
+  createdAt: text("created_at"),
+  updatedAt: text("updated_at"),
 });

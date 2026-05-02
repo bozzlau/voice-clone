@@ -85,7 +85,7 @@ export function VoiceUploadForm() {
       <div className="space-y-2">
         <Label>Audio Samples</Label>
         <div className="flex items-center gap-2">
-          <Input type="file" accept="audio/*" multiple onChange={handleFileChange} className="flex-1" />
+          <Input type="file" accept="audio/*,.m4a" multiple onChange={handleFileChange} className="flex-1" />
         </div>
         {files.length > 0 && (
           <ul className="text-sm text-muted-foreground">
@@ -94,7 +94,7 @@ export function VoiceUploadForm() {
             ))}
           </ul>
         )}
-        <p className="text-xs text-muted-foreground">Upload WAV or MP3 files, ~10-60 seconds each.</p>
+        <p className="text-xs text-muted-foreground">Supports WAV, MP3, M4A (iPhone). Recommended length: ~10-60 seconds each.</p>
       </div>
       {submitting && <Progress value={50} className="w-full" />}
       <Button type="submit" disabled={submitting}>

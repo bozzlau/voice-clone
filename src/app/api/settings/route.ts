@@ -11,9 +11,20 @@ export async function GET() {
     .get();
 
   const apiKey = row?.value || null;
+
+  let maskedKey: string | null = null;
+  if (apiKey) {
+    maskedKey = apiKey.length > 8
+      ? apiKey.substring(0, 4) + "*".repeat(apiKey.length - 8) + apiKey.slice(-4)
+      : apiKey.substring(0, 4) + "****";
+  }
+
   return NextResponse.json({
     exists: !!apiKey,
     prefix: apiKey ? apiKey.substring(0, 4) + "..." : null,
+    maskedKey,
+    createdAt: row?.createdAt || null,
+    updatedAt: row?.updatedAt || null,
   });
 }
 
@@ -29,9 +40,24 @@ export async function PUT(request: NextRequest) {
     );
   }
 
+  const now = new Date().toISOString();
+  const existing = db
+    .select()
+    .from(schema.settings)
+    .where(eq(schema.settings.key, key))
+    .get();
+
   db.insert(schema.settings)
-    .values({ key, value })
-    .onConflictDoUpdate({ target: schema.settings.key, set: { value } })
+    .values({
+      key,
+      value,
+      createdAt: existing?.createdAt || now,
+      updatedAt: now,
+    })
+    .onConflictDoUpdate({
+      target: schema.settings.key,
+      set: { value, createdAt: existing?.createdAt || now, updatedAt: now },
+    })
     .run();
 
   return NextResponse.json({ success: true });
