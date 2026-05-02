@@ -1,15 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db, schema } from "@/lib/db";
 import { FishAudioClient } from "@/lib/fish-audio";
+import { deleteAudio } from "@/lib/audio-storage";
 import { eq } from "drizzle-orm";
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const { searchParams } = new URL(request.url);
-  const refresh = searchParams.get("refresh") === "true";
 
   const voice = db
     .select()
@@ -19,33 +18,6 @@ export async function GET(
 
   if (!voice) {
     return NextResponse.json({ error: "Voice model not found" }, { status: 404 });
-  }
-
-  if (refresh) {
-    const apiKeyRow = db
-      .select()
-      .from(schema.settings)
-      .where(eq(schema.settings.key, "api_key"))
-      .get();
-
-    if (apiKeyRow?.value) {
-      try {
-        const client = new FishAudioClient(apiKeyRow.value);
-        const fishModel = await client.getModel(voice.fishModelId);
-
-        const newState: typeof voice.state = (["created", "training", "trained", "failed"].includes(fishModel.state)
-          ? fishModel.state
-          : voice.state) as typeof voice.state;
-        db.update(schema.voiceModels)
-          .set({ state: newState, updatedAt: new Date().toISOString() })
-          .where(eq(schema.voiceModels.id, voice.id))
-          .run();
-
-        return NextResponse.json({ ...voice, state: newState });
-      } catch (e) {
-        console.error("Failed to refresh model state:", e);
-      }
-    }
   }
 
   return NextResponse.json(voice);
@@ -142,6 +114,19 @@ export async function DELETE(
       // Continue with local deletion
     }
   }
+
+  // Clean up associated TTS history audio files
+  const historyRecords = db
+    .select()
+    .from(schema.ttsHistory)
+    .where(eq(schema.ttsHistory.voiceModelId, Number(id)))
+    .all();
+  for (const record of historyRecords) {
+    deleteAudio(record.audioFilePath);
+  }
+  db.delete(schema.ttsHistory)
+    .where(eq(schema.ttsHistory.voiceModelId, Number(id)))
+    .run();
 
   db.delete(schema.voiceModels)
     .where(eq(schema.voiceModels.id, Number(id)))

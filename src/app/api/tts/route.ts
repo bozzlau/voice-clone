@@ -66,9 +66,10 @@ export async function POST(request: NextRequest) {
     const params = { speed: speed || 1.0, temperature: temperature || 0.7 };
 
     // Record history
+    let historyId: number | null = null;
     if (saveToHistory !== false) {
       const now = new Date().toISOString();
-      db.insert(schema.ttsHistory)
+      const result = db.insert(schema.ttsHistory)
         .values({
           voiceModelId: voice.id,
           voiceModelName: voice.name,
@@ -78,12 +79,14 @@ export async function POST(request: NextRequest) {
           audioFilePath: filename,
           createdAt: now,
         })
-        .run();
+        .returning({ id: schema.ttsHistory.id })
+        .get();
+      historyId = result?.id ?? null;
     }
 
     return NextResponse.json({
       audioUrl: `/api/audio/${filename}`,
-      historyId: null,
+      historyId,
       format: audioFormat,
       createdAt: new Date().toISOString(),
     });

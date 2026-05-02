@@ -3,9 +3,10 @@
 import { useEffect, useState, useCallback } from "react";
 import { HistoryList } from "@/components/history/HistoryList";
 import { toast } from "sonner";
+import type { TTSHistoryItem } from "@/lib/types";
 
 export default function HistoryPage() {
-  const [items, setItems] = useState<any[]>([]);
+  const [items, setItems] = useState<TTSHistoryItem[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);

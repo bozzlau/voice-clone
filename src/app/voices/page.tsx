@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
+import type { VoiceModel } from "@/lib/types";
 
 export default function VoicesPage() {
-  const [voices, setVoices] = useState<any[]>([]);
+  const [voices, setVoices] = useState<VoiceModel[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchVoices = useCallback(async () => {
@@ -29,14 +30,14 @@ export default function VoicesPage() {
   // Auto-poll every 10s if any model is in training/created state
   useEffect(() => {
     const hasPending = voices.some(
-      (v: any) => v.state === "created" || v.state === "training"
+      (v: VoiceModel) => v.state === "created" || v.state === "training"
     );
     if (!hasPending) return;
     const interval = setInterval(fetchVoices, 10000);
     return () => clearInterval(interval);
   }, [voices, fetchVoices]);
 
-  const handleRefresh = (id: number) => {
+  const handleRefresh = (_id: number) => {
     fetchVoices();
   };
 

@@ -17,10 +17,16 @@ export function VoicePreview({ voiceId, voiceName, onClose }: VoicePreviewProps)
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const blobUrlRef = useRef<string | null>(null);
 
   const handleGenerate = async () => {
     if (!text.trim()) return;
     setLoading(true);
+    // Revoke previous blob URL if any
+    if (blobUrlRef.current) {
+      URL.revokeObjectURL(blobUrlRef.current);
+      blobUrlRef.current = null;
+    }
     try {
       const res = await fetch(`/api/voices/${voiceId}/tts`, {
         method: "POST",
@@ -34,6 +40,7 @@ export function VoicePreview({ voiceId, voiceName, onClose }: VoicePreviewProps)
       }
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
+      blobUrlRef.current = url;
       if (audioRef.current) {
         audioRef.current.src = url;
         audioRef.current.play();
@@ -44,8 +51,15 @@ export function VoicePreview({ voiceId, voiceName, onClose }: VoicePreviewProps)
     setLoading(false);
   };
 
+  const handleClose = () => {
+    if (blobUrlRef.current) {
+      URL.revokeObjectURL(blobUrlRef.current);
+    }
+    onClose();
+  };
+
   return (
-    <Dialog open onOpenChange={(open) => !open && onClose()}>
+    <Dialog open onOpenChange={(open) => !open && handleClose()}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Preview: {voiceName}</DialogTitle>
@@ -60,7 +74,7 @@ export function VoicePreview({ voiceId, voiceName, onClose }: VoicePreviewProps)
           <audio ref={audioRef} controls className="w-full" />
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Close</Button>
+          <Button variant="outline" onClick={handleClose}>Close</Button>
           <Button onClick={handleGenerate} disabled={loading || !text.trim()}>
             {loading && <Loader2 className="mr-1 h-4 w-4 animate-spin" />}
             Generate

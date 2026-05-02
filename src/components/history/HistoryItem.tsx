@@ -2,16 +2,10 @@
 
 import { Button } from "@/components/ui/button";
 import { Play, Download, Trash2 } from "lucide-react";
+import type { TTSHistoryItem } from "@/lib/types";
 
 interface HistoryItemProps {
-  item: {
-    id: number;
-    voiceModelName: string;
-    inputText: string;
-    audioFormat: string;
-    audioFilePath: string;
-    createdAt: string;
-  };
+  item: TTSHistoryItem;
   onDelete: (id: number) => void;
 }
 

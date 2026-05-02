@@ -3,9 +3,10 @@
 import { HistoryItem } from "./HistoryItem";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import type { TTSHistoryItem } from "@/lib/types";
 
 interface HistoryListProps {
-  items: any[];
+  items: TTSHistoryItem[];
   page: number;
   totalPages: number;
   onPageChange: (page: number) => void;
