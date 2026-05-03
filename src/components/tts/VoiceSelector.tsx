@@ -20,12 +20,18 @@ export function VoiceSelector({ value, onChange }: VoiceSelectorProps) {
       .catch(() => {});
   }, []);
 
+  const selectedName = voices.find((v) => String(v.id) === value)?.name;
+
   return (
     <div className="space-y-2">
       <Label>Voice Model</Label>
       <Select value={value} onValueChange={onChange}>
         <SelectTrigger>
-          <SelectValue placeholder="Select a voice..." />
+          {selectedName ? (
+            <span data-slot="select-value" className="flex flex-1 text-left">{selectedName}</span>
+          ) : (
+            <SelectValue placeholder="Select a voice..." />
+          )}
         </SelectTrigger>
         <SelectContent>
           {voices.length === 0 && (
