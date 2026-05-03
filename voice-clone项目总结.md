@@ -134,6 +134,20 @@ build 通过后做了一次全面的 code review，发现了一些问题：
 - `params` 在路由处理函数里变成了 Promise，要 `await`
 - Turbopack 编译确实快，但偶发一些奇怪的 edge case
 
+## 启动和停止
+
+项目启动很简单，在项目根目录下运行：
+
+```bash
+npm run dev
+```
+
+启动后终端会显示 `http://localhost:3000`，浏览器打开就能访问。开发模式用的 Turbopack，热更新很快，改完代码保存就能看到效果。
+
+停止的话在终端按 `Ctrl + C` 就行。
+
+如果要正式部署，先 `npm run build` 构建生产版本，再用 `npm run start` 启动。
+
 ## 项目现状
 
 目前项目功能完整，可以正常使用：
